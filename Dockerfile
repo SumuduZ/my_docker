@@ -1,20 +1,26 @@
-# 使用 Miniconda 基础镜像
+# 使用 Miniconda 基础镜像，但不使用 conda 环境
 FROM continuumio/miniconda3
 
-# 创建工作目录
+# 设置工作目录
 WORKDIR /app
 
-# 拷贝环境配置文件
-COPY conda_env.yml /app/conda_env.yml
+# 拷贝项目文件（包括 main.py 和其他代码）
+COPY . .
 
-# 创建 Conda 环境（环境名为 llm4eda）
-RUN conda env create -f conda_env.yml
+# 使用 conda 安装系统依赖（如 verilator 和 gcc 等）
+RUN conda install -y -c vlsida-eda -c conda-forge \
+    verilator=5.028 \
+    gcc=14.1.0 \
+    flex \
+    make \
+    m4 \
+ && conda clean -a -y
 
-# 显式使用 bash 并初始化 conda（激活环境时必须）
-SHELL ["/bin/bash", "-c"]
+# 安装 pip 包
+RUN pip install --upgrade pip \
+ && pip install \
+    openai==1.76.0 \
+    zhipuai==2.1.5.20250421
 
-# 激活环境并安装你可能需要的包（如果有额外操作）
-RUN source /opt/conda/etc/profile.d/conda.sh && conda activate llm4eda && echo "Conda environment activated"
-
-# 设置默认使用该环境运行你的应用
-CMD ["conda", "run", "--no-capture-output", "-n", "llm4eda", "python", "workspace/main.py"]
+# 设置容器启动时默认命令
+CMD ["python", "workspace/main.py"]
