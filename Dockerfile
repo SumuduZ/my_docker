@@ -8,9 +8,9 @@ WORKDIR /app
 COPY conda_env.yml /app/conda_env.yml
 RUN conda env create -f conda_env.yml
 
-# 切换到非 root 用户（增强安全性）
-RUN useradd -m ojuser
-USER ojuser
+# # 切换到非 root 用户（增强安全性）
+# RUN useradd -m ojuser
+# USER ojuser
 
 # 设置默认 shell 为 Conda 环境中的 Bash
 SHELL ["conda", "run", "-n", "llm4eda", "/bin/bash", "-c"]
